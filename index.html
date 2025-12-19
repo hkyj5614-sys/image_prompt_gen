@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 나노바나나 프롬프트 생성기</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #a0a0a0;
+            font-size: 1.1em;
+        }
+
+        .card {
+            background: rgba(30, 30, 50, 0.8);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .prompt-input-section {
+            margin-bottom: 30px;
+        }
+
+        .prompt-input-section h2 {
+            color: #fff;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .prompt-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            background: rgba(20, 20, 35, 0.9);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            color: #e0e0e0;
+            font-size: 1em;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        .prompt-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .prompt-textarea::placeholder {
+            color: #666;
+        }
+
+        .option-section {
+            margin-bottom: 20px;
+            background: rgba(20, 20, 35, 0.6);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .option-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .option-header:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .option-header h3 {
+            color: #fff;
+            font-size: 1.1em;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .option-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .toggle-arrow {
+            color: #888;
+            font-size: 1.2em;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-arrow.open {
+            transform: rotate(180deg);
+        }
+
+        .option-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+
+        .option-content.open {
+            max-height: 500px;
+        }
+
+        .option-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding-top: 10px;
+        }
+
+        .option-btn {
+            padding: 10px 20px;
+            background: rgba(40, 40, 60, 0.8);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 25px;
+            color: #d0d0d0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95em;
+            font-weight: 500;
+        }
+
+        .option-btn:hover {
+            background: rgba(60, 60, 80, 0.9);
+            border-color: rgba(102, 126, 234, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .option-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .ratio-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .ratio-btn {
+            padding: 12px 24px;
+            background: rgba(40, 40, 60, 0.8);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            color: #d0d0d0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+            font-weight: 600;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .ratio-btn:hover {
+            background: rgba(60, 60, 80, 0.9);
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+
+        .ratio-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .selected-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(20, 20, 35, 0.5);
+            border-radius: 12px;
+            min-height: 60px;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            color: #fff;
+            font-size: 0.9em;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tag .remove {
+            cursor: pointer;
+            font-weight: bold;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .tag .remove:hover {
+            opacity: 1;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 15px;
+            color: #fff;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        .result-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .result-section.show {
+            display: block;
+            animation: slideDown 0.4s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-box {
+            position: relative;
+            padding: 20px;
+            background: rgba(20, 20, 35, 0.9);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .result-text {
+            color: #e0e0e0;
+            line-height: 1.6;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+
+        .copy-btn {
+            width: 100%;
+            padding: 15px;
+            background: rgba(40, 40, 60, 0.8);
+            border: 2px solid rgba(102, 126, 234, 0.5);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: rgba(60, 60, 80, 0.9);
+            border-color: #667eea;
+        }
+
+        .copy-btn.copied {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            border-color: #11998e;
+        }
+
+        .emoji {
+            font-size: 1.2em;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .option-btn, .ratio-btn {
+                font-size: 0.9em;
+                padding: 8px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 나노바나나 프롬프트 생성기</h1>
+            <p>이미지 생성을 위한 완벽한 프롬프트를 만들어보세요</p>
+        </div>
+
+        <div class="card">
+            <div class="prompt-input-section">
+                <h2><span class="emoji">📝</span> 무엇을 만들까요?</h2>
+                <textarea 
+                    class="prompt-textarea" 
+                    id="promptInput" 
+                    placeholder="예: 귀여운 고양이가 우주복을 입고 달 위를 걷는 모습"></textarea>
+            </div>
+
+            <div class="option-section">
+                <h3><span class="emoji">📐</span> 비율</h3>
+                <div class="ratio-options">
+                    <button class="ratio-btn" data-ratio="1:1">1:1</button>
+                    <button class="ratio-btn active" data-ratio="16:9">16:9</button>
+                    <button class="ratio-btn" data-ratio="9:16">9:16</button>
+                    <button class="ratio-btn" data-ratio="4:3">4:3</button>
+                </div>
+            </div>
+
+            <div class="option-section">
+                <div class="option-header" onclick="toggleSection('character')">
+                    <h3><span class="emoji">👤</span> 인물</h3>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="option-badge" id="characterBadge">0</span>
+                        <span class="toggle-arrow" id="characterArrow">▼</span>
+                    </div>
+                </div>
+                <div class="option-content" id="characterContent">
+                    <div class="option-group">
+                        <button class="option-btn" data-category="character" data-value="남성">남성</button>
+                        <button class="option-btn" data-category="character" data-value="여성">여성</button>
+                        <button class="option-btn" data-category="character" data-value="어린이">어린이</button>
+                        <button class="option-btn" data-category="character" data-value="노인">노인</button>
+                        <button class="option-btn" data-category="character" data-value="동물">동물</button>
+                        <button class="option-btn" data-category="character" data-value="판타지 캐릭터">판타지 캐릭터</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="option-section">
+                <div class="option-header" onclick="toggleSection('styleMain')">
+                    <h3><span class="emoji">🎨</span> 스타일</h3>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="option-badge" id="styleMainBadge">0</span>
+                        <span class="toggle-arrow" id="styleMainArrow">▼</span>
+                    </div>
+                </div>
+                <div class="option-content" id="styleMainContent">
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="color: #aaa; font-size: 0.9em; margin-bottom: 10px; display: flex; align-items: center; gap: 5px;">
+                            <span class="emoji">🎭</span> 형식
+                        </h4>
+                        <div class="option-group">
+                            <button class="option-btn" data-category="format" data-value="사진">사진</button>
+                            <button class="option-btn" data-category="format" data-value="일러스트">일러스트</button>
+                            <button class="option-btn" data-category="format" data-value="3D 렌더">3D 렌더</button>
+                            <button class="option-btn" data-category="format" data-value="애니메">애니메</button>
+                            <button class="option-btn" data-category="format" data-value="만화">만화</button>
+                            <button class="option-btn" data-category="format" data-value="스케치">스케치</button>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="color: #aaa; font-size: 0.9em; margin-bottom: 10px; display: flex; align-items: center; gap: 5px;">
+                            <span class="emoji">🎨</span> 화풍 (복수)
+                        </h4>
+                        <div class="option-group">
+                            <button class="option-btn" data-category="style" data-value="픽사">픽사</button>
+                            <button class="option-btn" data-category="style" data-value="지브리">지브리</button>
+                            <button class="option-btn" data-category="style" data-value="캐리커처">캐리커처</button>
+                            <button class="option-btn" data-category="style" data-value="팝아트">팝아트</button>
+                            <button class="option-btn" data-category="style" data-value="빈티지">빈티지</button>
+                            <button class="option-btn" data-category="style" data-value="사이버펑크">사이버펑크</button>
+                            <button class="option-btn" data-category="style" data-value="시네마틱">시네마틱</button>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="color: #aaa; font-size: 0.9em; margin-bottom: 10px; display: flex; align-items: center; gap: 5px;">
+                            <span class="emoji">📊</span> 표현 (복수)
+                        </h4>
+                        <div class="option-group">
+                            <button class="option-btn" data-category="expression" data-value="플랫">플랫</button>
+                            <button class="option-btn" data-category="expression" data-value="로우폴리">로우폴리</button>
+                            <button class="option-btn" data-category="expression" data-value="라인아트">라인아트</button>
+                            <button class="option-btn" data-category="expression" data-value="리얼리스틱">리얼리스틱</button>
+                            <button class="option-btn" data-category="expression" data-value="미니멀">미니멀</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 style="color: #aaa; font-size: 0.9em; margin-bottom: 10px; display: flex; align-items: center; gap: 5px;">
+                            <span class="emoji">🎬</span> 용도 (복수)
+                        </h4>
+                        <div class="option-group">
+                            <button class="option-btn" data-category="usage" data-value="인포그래픽">인포그래픽</button>
+                            <button class="option-btn" data-category="usage" data-value="아이콘">아이콘</button>
+                            <button class="option-btn" data-category="usage" data-value="로고">로고</button>
+                            <button class="option-btn" data-category="usage" data-value="아이소메트릭">아이소메트릭</button>
+                            <button class="option-btn" data-category="usage" data-value="썸네일">썸네일</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="option-section">
+                <div class="option-header" onclick="toggleSection('mood')">
+                    <h3><span class="emoji">🌈</span> 분위기/컬러</h3>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="option-badge" id="moodBadge">0</span>
+                        <span class="toggle-arrow" id="moodArrow">▼</span>
+                    </div>
+                </div>
+                <div class="option-content" id="moodContent">
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="color: #aaa; font-size: 0.9em; margin-bottom: 10px; display: flex; align-items: center; gap: 5px;">
+                            <span class="emoji">🎭</span> 분위기
+                        </h4>
+                        <div class="option-group">
+                            <button class="option-btn" data-category="mood" data-value="밝고 경쾌">밝고 경쾌</button>
+                            <button class="option-btn" data-category="mood" data-value="평화로운">평화로운</button>
+                            <button class="option-btn" data-category="mood" data-value="몽환적">몽환적</button>
+                            <button class="option-btn" data-category="mood" data-value="웅장한">웅장한</button>
+                            <button class="option-btn" data-category="mood" data-value="어두운">어두운</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 style="color: #aaa; font-size: 0.9em; margin-bottom: 10px; display: flex; align-items: center; gap: 5px;">
+                            <span class="emoji">🌈</span> 컬러
+                        </h4>
+                        <div class="option-group">
+                            <button class="option-btn" data-category="color" data-value="비비드">비비드</button>
+                            <button class="option-btn" data-category="color" data-value="파스텔">파스텔</button>
+                            <button class="option-btn" data-category="color" data-value="흑백">흑백</button>
+                            <button class="option-btn" data-category="color" data-value="웜톤">웜톤</button>
+                            <button class="option-btn" data-category="color" data-value="쿨톤">쿨톤</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="option-section">
+                <div class="option-header" onclick="toggleSection('advanced')">
+                    <h3><span class="emoji">⚙️</span> 고급</h3>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="option-badge" id="advancedBadge">0</span>
+                        <span class="toggle-arrow" id="advancedArrow">▼</span>
+                    </div>
+                </div>
+                <div class="option-content" id="advancedContent">
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="color: #aaa; font-size: 0.9em; margin-bottom: 10px; display: flex; align-items: center; gap: 5px;">
+                            <span class="emoji">📐</span> 구도
+                        </h4>
+                        <div class="option-group">
+                            <button class="option-btn" data-category="composition" data-value="클로즈업">클로즈업</button>
+                            <button class="option-btn" data-category="composition" data-value="인물샷">인물샷</button>
+                            <button class="option-btn" data-category="composition" data-value="전신">전신</button>
+                            <button class="option-btn" data-category="composition" data-value="와이드">와이드</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 style="color: #aaa; font-size: 0.9em; margin-bottom: 10px; display: flex; align-items: center; gap: 5px;">
+                            <span class="emoji">✏️</span> 텍스트
+                        </h4>
+                        <div class="option-group">
+                            <button class="option-btn" data-category="text" data-value="없음">없음</button>
+                            <button class="option-btn" data-category="text" data-value="한국어">한국어</button>
+                            <button class="option-btn" data-category="text" data-value="영어">영어</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="option-section">
+                <h3><span class="emoji">🏷️</span> 선택된 옵션</h3>
+                <div class="selected-tags" id="selectedTags">
+                    <span style="color: #888; font-size: 0.9em;">옵션을 선택하면 여기에 표시됩니다</span>
+                </div>
+            </div>
+
+            <button class="generate-btn" id="generateBtn">
+                🎨 프롬프트 생성
+            </button>
+        </div>
+
+        <div class="card result-section" id="resultSection">
+            <h2 style="margin-bottom: 20px; color: #fff;"><span class="emoji">✨</span> 생성된 프롬프트</h2>
+            <div class="result-box">
+                <div class="result-text" id="resultText"></div>
+            </div>
+            <button class="copy-btn" id="copyBtn">
+                📋 클립보드에 복사
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const state = {
+            prompt: '',
+            ratio: '16:9',
+            character: [],
+            format: null,
+            style: [],
+            expression: [],
+            usage: [],
+            mood: [],
+            color: [],
+            composition: null,
+            text: null
+        };
+
+        // 프롬프트 입력
+        document.getElementById('promptInput').addEventListener('input', (e) => {
+            state.prompt = e.target.value;
+            updateSelectedTags();
+        });
+
+        // 비율 선택
+        document.querySelectorAll('.ratio-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                state.ratio = btn.dataset.ratio;
+                updateSelectedTags();
+            });
+        });
+
+        // 토글 섹션
+        window.toggleSection = function(category) {
+            const content = document.getElementById(category + 'Content');
+            const arrow = document.getElementById(category + 'Arrow');
+            
+            content.classList.toggle('open');
+            arrow.classList.toggle('open');
+        };
+
+        // 옵션 버튼 클릭
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const category = btn.dataset.category;
+                const value = btn.dataset.value;
+
+                if (category === 'format' || category === 'text' || category === 'composition') {
+                    // 단일 선택
+                    document.querySelectorAll(`[data-category="${category}"]`).forEach(b => {
+                        b.classList.remove('active');
+                    });
+                    btn.classList.add('active');
+                    state[category] = value;
+                } else {
+                    // 복수 선택 (character, style, expression, usage, mood, color)
+                    btn.classList.toggle('active');
+                    if (btn.classList.contains('active')) {
+                        if (!state[category].includes(value)) {
+                            state[category].push(value);
+                        }
+                    } else {
+                        state[category] = state[category].filter(v => v !== value);
+                    }
+                }
+                updateBadges();
+                updateSelectedTags();
+            });
+        });
+
+        // 배지 업데이트
+        function updateBadges() {
+            // 인물
+            const characterCount = state.character.length;
+            document.getElementById('characterBadge').textContent = characterCount;
+
+            // 스타일 (형식 + 화풍 + 표현 + 용도)
+            const styleMainCount = 
+                (state.format ? 1 : 0) + 
+                state.style.length + 
+                state.expression.length + 
+                state.usage.length;
+            document.getElementById('styleMainBadge').textContent = styleMainCount;
+
+            // 분위기/컬러
+            const moodCount = state.mood.length + state.color.length;
+            document.getElementById('moodBadge').textContent = moodCount;
+
+            // 고급 (구도 + 텍스트)
+            const advancedCount = 
+                (state.composition ? 1 : 0) + 
+                (state.text ? 1 : 0);
+            document.getElementById('advancedBadge').textContent = advancedCount;
+        }
+
+        // 선택된 태그 업데이트
+        function updateSelectedTags() {
+            const tagsContainer = document.getElementById('selectedTags');
+            const tags = [];
+
+            if (state.ratio) tags.push({ label: `비율: ${state.ratio}`, removable: false });
+            state.character.forEach(c => tags.push({ label: c, category: 'character', value: c }));
+            if (state.format) tags.push({ label: state.format, category: 'format' });
+            state.style.forEach(s => tags.push({ label: s, category: 'style', value: s }));
+            state.expression.forEach(e => tags.push({ label: e, category: 'expression', value: e }));
+            state.usage.forEach(u => tags.push({ label: u, category: 'usage', value: u }));
+            state.mood.forEach(m => tags.push({ label: m, category: 'mood', value: m }));
+            state.color.forEach(c => tags.push({ label: c, category: 'color', value: c }));
+            if (state.composition) tags.push({ label: state.composition, category: 'composition' });
+            if (state.text) tags.push({ label: `텍스트: ${state.text}`, category: 'text' });
+
+            if (tags.length === 0) {
+                tagsContainer.innerHTML = '<span style="color: #888; font-size: 0.9em;">옵션을 선택하면 여기에 표시됩니다</span>';
+                return;
+            }
+
+            tagsContainer.innerHTML = tags.map((tag, index) => `
+                <div class="tag">
+                    <span>${tag.label}</span>
+                    ${tag.removable !== false ? `<span class="remove" onclick="removeTag('${tag.category}', '${tag.value || ''}')">✕</span>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // 태그 제거
+        window.removeTag = function(category, value) {
+            if (category === 'format' || category === 'text' || category === 'composition') {
+                state[category] = null;
+                document.querySelectorAll(`[data-category="${category}"]`).forEach(btn => {
+                    btn.classList.remove('active');
+                });
+            } else {
+                // character, style, expression, usage, mood, color
+                state[category] = state[category].filter(v => v !== value);
+                document.querySelectorAll(`[data-category="${category}"][data-value="${value}"]`).forEach(btn => {
+                    btn.classList.remove('active');
+                });
+            }
+            updateBadges();
+            updateSelectedTags();
+        };
+
+        // 프롬프트 생성
+        document.getElementById('generateBtn').addEventListener('click', () => {
+            if (!state.prompt.trim()) {
+                alert('프롬프트를 입력해주세요!');
+                return;
+            }
+
+            // 한글 프롬프트
+            let koreanPrompt = state.prompt;
+
+            // 영문 스타일 배열
+            let styleElements = [];
+
+            // 비율
+            const ratioMap = {
+                '1:1': 'square format',
+                '16:9': '16:9 aspect ratio',
+                '9:16': '9:16 aspect ratio',
+                '4:3': '4:3 aspect ratio'
+            };
+            styleElements.push(ratioMap[state.ratio] || '16:9 aspect ratio');
+
+            // 인물
+            const characterMap = {
+                '남성': 'male character',
+                '여성': 'female character',
+                '어린이': 'child',
+                '노인': 'elderly person',
+                '동물': 'animal',
+                '판타지 캐릭터': 'fantasy character'
+            };
+            state.character.forEach(c => {
+                if (characterMap[c]) styleElements.push(characterMap[c]);
+            });
+
+            // 형식
+            const formatMap = {
+                '사진': 'photograph',
+                '일러스트': 'illustration',
+                '3D 렌더': '3D render',
+                '애니메': 'anime style',
+                '만화': 'comic style',
+                '스케치': 'sketch'
+            };
+            if (state.format && formatMap[state.format]) {
+                styleElements.push(formatMap[state.format]);
+            }
+
+            // 화풍
+            const styleMap = {
+                '픽사': 'Pixar style',
+                '지브리': 'Studio Ghibli style',
+                '캐리커처': 'caricature',
+                '팝아트': 'pop art',
+                '빈티지': 'vintage style',
+                '사이버펑크': 'cyberpunk',
+                '시네마틱': 'cinematic'
+            };
+            state.style.forEach(s => {
+                if (styleMap[s]) styleElements.push(styleMap[s]);
+            });
+
+            // 표현
+            const expressionMap = {
+                '플랫': 'flat design',
+                '로우폴리': 'low poly',
+                '라인아트': 'line art',
+                '리얼리스틱': 'realistic',
+                '미니멀': 'minimalist'
+            };
+            state.expression.forEach(e => {
+                if (expressionMap[e]) styleElements.push(expressionMap[e]);
+            });
+
+            // 용도
+            const usageMap = {
+                '인포그래픽': 'infographic',
+                '아이콘': 'icon design',
+                '로고': 'logo design',
+                '아이소메트릭': 'isometric',
+                '썸네일': 'thumbnail'
+            };
+            state.usage.forEach(u => {
+                if (usageMap[u]) styleElements.push(usageMap[u]);
+            });
+
+            // 분위기
+            const moodMap = {
+                '밝고 경쾌': 'bright and cheerful',
+                '평화로운': 'peaceful',
+                '몽환적': 'dreamy',
+                '웅장한': 'grand and majestic',
+                '어두운': 'dark'
+            };
+            state.mood.forEach(m => {
+                if (moodMap[m]) styleElements.push(moodMap[m]);
+            });
+
+            // 컬러
+            const colorMap = {
+                '비비드': 'vivid colors',
+                '파스텔': 'pastel colors',
+                '흑백': 'black and white',
+                '웜톤': 'warm tones',
+                '쿨톤': 'cool tones'
+            };
+            state.color.forEach(c => {
+                if (colorMap[c]) styleElements.push(colorMap[c]);
+            });
+
+            // 구도
+            const compositionMap = {
+                '클로즈업': 'close-up shot',
+                '인물샷': 'portrait shot',
+                '전신': 'full body shot',
+                '와이드': 'wide shot'
+            };
+            if (state.composition && compositionMap[state.composition]) {
+                styleElements.push(compositionMap[state.composition]);
+            }
+
+            // 텍스트
+            if (state.text && state.text !== '없음') {
+                const textMap = {
+                    '한국어': 'with Korean text',
+                    '영어': 'with English text'
+                };
+                if (textMap[state.text]) styleElements.push(textMap[state.text]);
+            } else if (state.text === '없음') {
+                styleElements.push('no text');
+            }
+
+            // 기본 품질 옵션 추가
+            styleElements.push('highly detailed');
+            styleElements.push('professional quality');
+
+            // 최종 결과
+            const englishStyle = 'Style: ' + styleElements.join(', ');
+            const result = koreanPrompt + '\n\n' + englishStyle;
+
+            document.getElementById('resultText').textContent = result;
+            document.getElementById('resultSection').classList.add('show');
+            document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+
+        // 복사 버튼
+        document.getElementById('copyBtn').addEventListener('click', async () => {
+            const text = document.getElementById('resultText').textContent;
+            const btn = document.getElementById('copyBtn');
+            
+            try {
+                await navigator.clipboard.writeText(text);
+                btn.textContent = '✓ 복사완료!';
+                btn.classList.add('copied');
+                
+                setTimeout(() => {
+                    btn.textContent = '📋 클립보드에 복사';
+                    btn.classList.remove('copied');
+                }, 2000);
+            } catch (err) {
+                alert('복사에 실패했습니다. 다시 시도해주세요.');
+            }
+        });
+
+        // 초기화
+        updateSelectedTags();
+        updateBadges();
+    </script>
+</body>
+</html>
