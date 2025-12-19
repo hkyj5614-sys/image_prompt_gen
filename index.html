@@ -286,6 +286,29 @@
             transform: translateY(0);
         }
 
+        .reset-btn {
+            padding: 18px 30px;
+            background: rgba(40, 40, 60, 0.8);
+            border: 2px solid rgba(102, 126, 234, 0.5);
+            border-radius: 15px;
+            color: #fff;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .reset-btn:hover {
+            background: rgba(60, 60, 80, 0.9);
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .reset-btn:active {
+            transform: translateY(0);
+        }
+
         .result-section {
             margin-top: 30px;
             display: none;
@@ -556,9 +579,14 @@
                 </div>
             </div>
 
-            <button class="generate-btn" id="generateBtn">
-                🎨 프롬프트 생성
-            </button>
+            <div style="display: flex; gap: 10px;">
+                <button class="generate-btn" id="generateBtn" style="flex: 1;">
+                    🎨 프롬프트 생성
+                </button>
+                <button class="reset-btn" id="resetBtn">
+                    🔄 초기화
+                </button>
+            </div>
         </div>
 
         <div class="card result-section" id="resultSection">
@@ -875,6 +903,64 @@
             } catch (err) {
                 alert('복사에 실패했습니다. 다시 시도해주세요.');
             }
+        });
+
+        // 초기화 버튼
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            // 확인 대화상자
+            if (!confirm('모든 선택을 초기화하시겠습니까?')) {
+                return;
+            }
+
+            // 프롬프트 입력 초기화
+            document.getElementById('promptInput').value = '';
+            
+            // 상태 초기화
+            state.prompt = '';
+            state.ratio = '16:9';
+            state.character = [];
+            state.format = null;
+            state.style = [];
+            state.expression = [];
+            state.usage = [];
+            state.mood = [];
+            state.color = [];
+            state.composition = null;
+            state.text = null;
+
+            // 모든 버튼 active 클래스 제거
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // 비율 버튼 초기화 (16:9만 선택)
+            document.querySelectorAll('.ratio-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.ratio === '16:9') {
+                    btn.classList.add('active');
+                }
+            });
+
+            // 모든 토글 닫기
+            ['character', 'styleMain', 'mood', 'advanced'].forEach(section => {
+                const content = document.getElementById(section + 'Content');
+                const arrow = document.getElementById(section + 'Arrow');
+                if (content && arrow) {
+                    content.classList.remove('open');
+                    arrow.classList.remove('open');
+                    arrow.textContent = '▼';
+                }
+            });
+
+            // 결과 섹션 숨기기
+            document.getElementById('resultSection').classList.remove('show');
+
+            // UI 업데이트
+            updateSelectedTags();
+            updateBadges();
+
+            // 맨 위로 스크롤
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
 
         // 초기화
