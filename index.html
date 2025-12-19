@@ -907,11 +907,6 @@
 
         // 초기화 버튼
         document.getElementById('resetBtn').addEventListener('click', () => {
-            // 확인 대화상자
-            if (!confirm('모든 선택을 초기화하시겠습니까?')) {
-                return;
-            }
-
             // 프롬프트 입력 초기화
             document.getElementById('promptInput').value = '';
             
